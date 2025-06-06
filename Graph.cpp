@@ -91,28 +91,46 @@ std::ostream& operator<<(std::ostream& out, const Connection& c) {
 
 // STUDENT TODO: IMPLEMENT
 void Graph::updateNode(int id, NodeInfo n) {
-    if (true /* stub condition: change this to the correct condition*/) {
+
+    if (id>=nodes.size() || id < 0) {
         cout << "Attempting to update node with id: " << id << " but node does not exist" << endl;
         return;
+    }else{
+        NodeInfo* point= new NodeInfo;
+        point->preActivationValue = n.preActivationValue;
+        point->bias = n.bias;
+        point->activationFunction =n.activationFunction;
+        point->activationDerivative = n.activationDerivative;
+        point->activate();
+        point->delta = n.delta;
+       nodes.at(id)= point;
     }
+
 
     return; //stub
 }
 
 // STUDENT TODO: IMPLEMENT
 NodeInfo* Graph::getNode(int id) const {
-    return nullptr; //stub
+    return nodes.at(id);
 }
 
 // STUDENT TODO: IMPLEMENT
 void Graph::updateConnection(int v, int u, double w) {
-    if (true /* stub condition: change this to the correct condition*/) {
+    if (v>=nodes.size()|| v<0) {
         cerr << "Attempting to update connection between " << v << " and " << u << " with weight " << w << " but " << v << " does not exist" << endl;
         exit(1);
     }
-    if (true /* stub condition: change this to the correct condition*/) {
+    if (u>=nodes.size()|| u<0) {
         cerr << "Attempting to update connection between " << v << " and " << u << " with weight " << w << " but " << u << " does not exist" << endl;
         exit(1);
+    }
+    auto it = adjacencyList.at(v).find(u);
+    if(it != adjacencyList.at(v).end()){
+        adjacencyList[v][u].weight = w;
+    }else{
+        Connection edge(v,u,w);
+        adjacencyList[v].insert({u,edge});
     }
     
     return; //stub
@@ -120,7 +138,11 @@ void Graph::updateConnection(int v, int u, double w) {
 
 // STUDENT TODO: IMPLEMENT
 void Graph::clear() {
-    return; //stub
+    for(int i =0; i<nodes.size(); i++){
+        delete nodes.at(i);
+        nodes.at(i)= nullptr;
+    }
+    cout<< "it";
 }
 
 
