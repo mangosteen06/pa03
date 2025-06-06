@@ -78,25 +78,98 @@ vector<double> NeuralNetwork::predict(DataInstance instance) {
     // 1. Set up your queue initialization
     queue<int> Queue;
     // 2. Start visiting nodes using the queue
+    
     int it;
+    bool found;
+    int destination;
+    int count =0;
+    int time=0;
+    bool check;
+    bool first= false;
     vector<bool> visited(nodes.size(), false);
+    vector<bool> neighborV(nodes.size(), false);
     if(nodes.size()!=0){
-        for(int i = 0;i<visited.size();i++){
-            if( visited.at(i) == false){
-                Queue.push(i);
-                    while(!Queue.empty()){
-                        it = Queue.front();
-                        cout<<nodes.at(it)->postActivationValue;
-                        if(visited.at(it)==false){
-                            visitPredictNode(it);
-                        }
-                        visited.at(it)=true;
-                        Queue.pop();
-                        for(auto e: adjacencyList[it]){
-                            visitPredictNeighbor(e.second);   
-                        }
+        Queue.push(0);
+            while(!Queue.empty()){
+
+                it = Queue.front();
+                visited.at(it)=true;
+                found =false;
+                cout<<it;
+                ++count;
+                check = false;
+                cout<<"pre"<<nodes.at(it)->preActivationValue<<endl;
+                Queue.pop();
+                
+
+                 for(auto e: adjacencyList[it]){ 
+                    if(it+1 ==e.second.dest){
+                        found = true;
+                        cout<<"dest"<<e.second.dest<<endl;
+                      
                     }
-            }
+
+            // cout<<"weight"<<e.second.weight;
+                   
+                }
+
+                        cout<<"time"<<time<<endl;
+                          cout<<"count"<<count<<endl;
+                //   if((time == count)||(it = nodes.size()-1)){
+                cout<<"a"<<nodes.at(it)->postActivationValue<<endl;
+                if(time == count&& !first){
+                            visitPredictNode(it);
+                             cout<<"post"<<nodes.at(it)->postActivationValue<<endl;
+                             time =0;
+                             count = 0;
+                             first = true;
+                        }else if(time != count){
+                    visitPredictNode(it);
+                }else {
+time =0;
+                             count = 0;
+                }
+                if( it== (nodes.size()-1)){
+
+                    visitPredictNode(it);
+                }
+                if(!found){
+                     if(it!= neighborV.size()-1&&neighborV.at(it+1) == false){
+                        Queue.push(it+1);
+                    }
+                }
+                // cout<<"p"<<nodes.at(it)->preActivationValue<<endl;
+                for(auto e: adjacencyList[it]){  
+                            //  cout<<"b"<<nodes.at(e.second.dest)->preActivationValue<<endl;
+                    visitPredictNeighbor(e.second);
+                             cout<<"a"<<nodes.at(e.second.dest)->preActivationValue<<endl;
+                    if(neighborV.at(e.second.dest) == false){
+                        Queue.push(e.second.dest);
+                    }else{
+                        check = true;
+                    }
+
+                // cout<<e.first;
+                    neighborV.at(e.second.dest)=true;
+                   
+                }
+                if(!check){
+                    for(int i = 0; i < visited.size();i++){
+                    if(visited.at(i)==true){
+                        for(int j = i; j<neighborV.size();j++ ){
+                                time++;
+                            if(neighborV.at(j)==true){
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
+                }
+                
+
+                    
+            
         }   
     }
     

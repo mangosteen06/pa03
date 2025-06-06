@@ -107,6 +107,7 @@ void Graph::updateNode(int id, NodeInfo n) {
     }
 
 
+    cout<< "a";
     return; //stub
 }
 
@@ -128,10 +129,14 @@ void Graph::updateConnection(int v, int u, double w) {
     auto it = adjacencyList.at(v).find(u);
     if(it != adjacencyList.at(v).end()){
         adjacencyList[v][u].weight = w;
+        // cout<<"w"<<w;
     }else{
         Connection edge(v,u,w);
         adjacencyList[v].insert({u,edge});
+// cout<<"w"<<w<<endl;
+//     cout<< "b";
     }
+    
     
     return; //stub
 }
