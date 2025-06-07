@@ -129,7 +129,6 @@ void Graph::updateConnection(int v, int u, double w) {
     auto it = adjacencyList.at(v).find(u);
     if(it != adjacencyList.at(v).end()){
         adjacencyList[v][u].weight = w;
-        // cout<<"w"<<w;
     }else{
         Connection edge(v,u,w);
         adjacencyList[v].insert({u,edge});

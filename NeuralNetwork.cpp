@@ -32,9 +32,8 @@ void NeuralNetwork::setLearningRate(double lr) {
 // STUDENT TODO: IMPLEMENT
 void NeuralNetwork::setInputNodeIds(std::vector<int> inputNodeIds) {
 //stub
-    for(int i = 0; i<inputNodeIds.size(); i++){
-        this->inputNodeIds.push_back(inputNodeIds.at(i));
-    }
+        this->inputNodeIds= inputNodeIds;
+    
 
 }
 // contains a set of node ids which correspond to output nodes
@@ -43,9 +42,7 @@ void NeuralNetwork::setInputNodeIds(std::vector<int> inputNodeIds) {
 // STUDENT TODO: IMPLEMENT
 void NeuralNetwork::setOutputNodeIds(std::vector<int> outputNodeIds) {
     //stub
-    for(int i = 0; i<outputNodeIds.size(); i++){
-            this->outputNodeIds.push_back(outputNodeIds.at(i));
-        }
+        this->outputNodeIds= outputNodeIds;
     }
 // gets the id's of every input node. 
        
@@ -77,40 +74,32 @@ vector<double> NeuralNetwork::predict(DataInstance instance) {
 
     // 1. Set up your queue initialization
     queue<int> Queue;
-    // 2. Start visiting nodes using the queue
     vector<bool> visited(nodes.size(), false);
-    visited.at(0)=true;
-    Queue.push(0);
-    bool found;
-    int it;
-    vector<int> degree(nodes.size(),0);
-    for(int i =0; i< nodes.size();i++){
-        for(auto e: adjacencyList[i]){
+    vector<int> degree(nodes.size(), 0);
+    for (int i = 0; i < nodes.size(); i++) {
+        for (auto e : adjacencyList[i]) {
             degree[e.second.dest]++;
         }
     }
-    for(int i =0; i<nodes.size();i++){
-        if(degree[i]==0){
+    for (int i = 0; i < nodes.size(); i++) {
+        if (degree[i] == 0) {
             Queue.push(i);
         }
     }
-    while(!Queue.empty()){
-       it = Queue.front();
-       Queue.pop();
-
-              
-       for(auto e: adjacencyList[it]){
-        degree[e.second.dest]--;
-        // cout<<e.second.weight<<endl;
-        if(degree[e.second.dest]==0){
-            if(visited.at(it)==false){
-                visitPredictNode(it);
-                visited.at(it )=true;
-            }
-            visitPredictNeighbor(e.second);
-            Queue.push(e.second.dest);
+    while (!Queue.empty()) {
+        int it = Queue.front();
+        Queue.pop();
+        if (!visited[it]) {
+            visitPredictNode(it); 
+            visited[it] = true;
         }
-       }
+        for (auto e : adjacencyList[it]) {
+            degree[e.second.dest]--;
+            if (degree[e.second.dest] == 0) {
+                visitPredictNeighbor(e.second);  
+                Queue.push(e.second.dest);
+            }
+        }
     }
     
     vector<double> output;
@@ -128,6 +117,7 @@ vector<double> NeuralNetwork::predict(DataInstance instance) {
         // accumulate derivatives. If in training mode, weights and biases get accumulated
         contribute(instance.y, output.at(0));
     }
+    
     return output;
 }
 // STUDENT TODO: IMPLEMENT
@@ -153,6 +143,7 @@ bool NeuralNetwork::contribute(double y, double p) {
 }
 // STUDENT TODO: IMPLEMENT
 double NeuralNetwork::contribute(int nodeId, const double& y, const double& p) {
+
     double incomingContribution = 0;
     double outgoingContribution = 0;
     NodeInfo* currNode = nodes.at(nodeId);
@@ -184,7 +175,6 @@ double NeuralNetwork::contribute(int nodeId, const double& y, const double& p) {
 // STUDENT TODO: IMPLEMENT
 bool NeuralNetwork::update() {
     // apply the derivative contributions
-
     // traverse the graph in anyway you want. 
     // Each node has a delta term 
     // Each connection has a delta term
@@ -204,7 +194,7 @@ bool NeuralNetwork::update() {
             c = nodes.at(e.second.dest)->delta;
             c*= learningRate;
             e.second.weight -= c;
-            e.second.delta = 0;
+            e.second.delta = 0.0;
         }
 
         it -> delta = 0; 
