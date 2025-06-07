@@ -78,99 +78,39 @@ vector<double> NeuralNetwork::predict(DataInstance instance) {
     // 1. Set up your queue initialization
     queue<int> Queue;
     // 2. Start visiting nodes using the queue
-    
-    int it;
-    bool found;
-    int destination;
-    int count =0;
-    int time=0;
-    bool check;
-    bool first= false;
     vector<bool> visited(nodes.size(), false);
-    vector<bool> neighborV(nodes.size(), false);
-    if(nodes.size()!=0){
-        Queue.push(0);
-            while(!Queue.empty()){
+    visited.at(0)=true;
+    Queue.push(0);
+    bool found;
+    int it;
+    vector<int> degree(nodes.size(),0);
+    for(int i =0; i< nodes.size();i++){
+        for(auto e: adjacencyList[i]){
+            degree[e.second.dest]++;
+        }
+    }
+    for(int i =0; i<nodes.size();i++){
+        if(degree[i]==0){
+            Queue.push(i);
+        }
+    }
+    while(!Queue.empty()){
+       it = Queue.front();
+       Queue.pop();
 
-                it = Queue.front();
-                visited.at(it)=true;
-                found =false;
-                cout<<it;
-                ++count;
-                check = false;
-                cout<<"pre"<<nodes.at(it)->preActivationValue<<endl;
-                Queue.pop();
-                
-
-                 for(auto e: adjacencyList[it]){ 
-                    if(it+1 ==e.second.dest){
-                        found = true;
-                        cout<<"dest"<<e.second.dest<<endl;
-                      
-                    }
-
-            // cout<<"weight"<<e.second.weight;
-                   
-                }
-
-                        cout<<"time"<<time<<endl;
-                          cout<<"count"<<count<<endl;
-                //   if((time == count)||(it = nodes.size()-1)){
-                cout<<"a"<<nodes.at(it)->postActivationValue<<endl;
-                if(time == count&& !first){
-                            visitPredictNode(it);
-                             cout<<"post"<<nodes.at(it)->postActivationValue<<endl;
-                             time =0;
-                             count = 0;
-                             first = true;
-                        }else if(time != count){
-                    visitPredictNode(it);
-                }else {
-time =0;
-                             count = 0;
-                }
-                if( it== (nodes.size()-1)){
-
-                    visitPredictNode(it);
-                }
-                if(!found){
-                     if(it!= neighborV.size()-1&&neighborV.at(it+1) == false){
-                        Queue.push(it+1);
-                    }
-                }
-                // cout<<"p"<<nodes.at(it)->preActivationValue<<endl;
-                for(auto e: adjacencyList[it]){  
-                            //  cout<<"b"<<nodes.at(e.second.dest)->preActivationValue<<endl;
-                    visitPredictNeighbor(e.second);
-                             cout<<"a"<<nodes.at(e.second.dest)->preActivationValue<<endl;
-                    if(neighborV.at(e.second.dest) == false){
-                        Queue.push(e.second.dest);
-                    }else{
-                        check = true;
-                    }
-
-                // cout<<e.first;
-                    neighborV.at(e.second.dest)=true;
-                   
-                }
-                if(!check){
-                    for(int i = 0; i < visited.size();i++){
-                    if(visited.at(i)==true){
-                        for(int j = i; j<neighborV.size();j++ ){
-                                time++;
-                            if(neighborV.at(j)==true){
-                                break;
-                            }
-                        }
-                        break;
-                    }
-                }
-                }
-                
-
-                    
-            
-        }   
+              
+       for(auto e: adjacencyList[it]){
+        degree[e.second.dest]--;
+        // cout<<e.second.weight<<endl;
+        if(degree[e.second.dest]==0){
+            if(visited.at(it)==false){
+                visitPredictNode(it);
+                visited.at(it )=true;
+            }
+            visitPredictNeighbor(e.second);
+            Queue.push(e.second.dest);
+        }
+       }
     }
     
     vector<double> output;
@@ -199,7 +139,7 @@ bool NeuralNetwork::contribute(double y, double p) {
     // find each incoming contribution, and contribute to the input layer's outgoing weights
     // If the node is already found, use its precomputed contribution from the contributions map
     // There is no need to visitContributeNode for the input layer since there is no bias to update.
-    cout<<"size";
+
     for(int i =0 ;i < nodes.size(); i++){
         auto it = contributions.find(i);
         if(it != contributions.end()){
@@ -216,7 +156,7 @@ double NeuralNetwork::contribute(int nodeId, const double& y, const double& p) {
     double incomingContribution = 0;
     double outgoingContribution = 0;
     NodeInfo* currNode = nodes.at(nodeId);
-cout<<"size";
+
     // find each incoming contribution, and contribute to the nodes outgoing weights
     // If the node is already found, use its precomputed contribution from the contributions map
 
@@ -244,7 +184,7 @@ cout<<"size";
 // STUDENT TODO: IMPLEMENT
 bool NeuralNetwork::update() {
     // apply the derivative contributions
-cout<<"size";
+
     // traverse the graph in anyway you want. 
     // Each node has a delta term 
     // Each connection has a delta term
@@ -254,16 +194,20 @@ cout<<"size";
     // weight update: weight = weight - (learningRate * delta)
     // reset the delta term for each node and connection to zero.
     NodeInfo* it; 
-    int change;
+    double change;
+    double c;
     for(int i = 0; i< nodes.size(); i++){
         it = nodes.at(i);
         change = learningRate*it->delta;
         it->bias -=change;
-        it -> delta = 0; 
         for(auto e: adjacencyList[i]){
-            e.second.weight -= change;
+            c = nodes.at(e.second.dest)->delta;
+            c*= learningRate;
+            e.second.weight -= c;
             e.second.delta = 0;
         }
+
+        it -> delta = 0; 
     }
     flush();
     return true;
