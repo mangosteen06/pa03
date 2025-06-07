@@ -107,7 +107,7 @@ void Graph::updateNode(int id, NodeInfo n) {
     }
 
 
-    cout<< "a";
+    // cout<< "a";
     return; //stub
 }
 
