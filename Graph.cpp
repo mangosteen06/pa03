@@ -147,7 +147,7 @@ void Graph::clear() {
         delete nodes.at(i);
         nodes.at(i)= nullptr;
     }
-    cout<< "it";
+    // cout<< "it";
 }
 
 
