@@ -91,6 +91,8 @@ class NeuralNetwork : public Graph {
         // contains ids of output nodes
         std::vector<int> outputNodeIds;
 
+       
+
 
         // other helpful methods...
         // loads neural network structure from the input file stream

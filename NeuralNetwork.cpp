@@ -75,32 +75,40 @@ vector<double> NeuralNetwork::predict(DataInstance instance) {
     // 1. Set up your queue initialization
     queue<int> Queue;
     vector<bool> visited(nodes.size(), false);
-    vector<int> degree(nodes.size(), 0);
+    vector<int> inOrder(nodes.size(), 0);
     for (int i = 0; i < nodes.size(); i++) {
         for (auto e : adjacencyList[i]) {
-            degree[e.second.dest]++;
+            inOrder[e.second.dest]++;
         }
     }
     for (int i = 0; i < nodes.size(); i++) {
-        if (degree[i] == 0) {
+        if (inOrder[i] == 0) {
             Queue.push(i);
+        }
+    }
+    for(int i = 0; i< nodes.size(); i++){
+        if(!visited.at(i)){
+            
         }
     }
     while (!Queue.empty()) {
         int it = Queue.front();
         Queue.pop();
-        if (!visited[it]) {
-            visitPredictNode(it); 
-            visited[it] = true;
-        }
-        for (auto e : adjacencyList[it]) {
-            degree[e.second.dest]--;
-            if (degree[e.second.dest] == 0) {
-                visitPredictNeighbor(e.second);  
+
+    
+        for (auto& e : adjacencyList[it]) {
+            visitPredictNeighbor(e.second);  
+            inOrder[e.second.dest]--;
+            if (inOrder[e.second.dest] == 0 && !visited[e.second.dest]) {
                 Queue.push(e.second.dest);
             }
+
+        }
+        if (!visited[it]) {
+            visitPredictNode(it); 
         }
     }
+        
     
     vector<double> output;
     for (int i = 0; i < outputNodeIds.size(); i++) {
@@ -125,18 +133,21 @@ bool NeuralNetwork::contribute(double y, double p) {
     double incomingContribution = 0;
     double outgoingContribution = 0;
     NodeInfo* currNode = nullptr;
-
+ 
+contributions.clear();
     // find each incoming contribution, and contribute to the input layer's outgoing weights
     // If the node is already found, use its precomputed contribution from the contributions map
     // There is no need to visitContributeNode for the input layer since there is no bias to update.
+  for( int i =0; i< inputNodeIds.size();i++){
+        // auto it = contributions.find(inputNodeIds.at(i));
+        // if(it == contributions.end()){
+            contribute(inputNodeIds.at(i),y,p);
+        // }
+  }
 
-    for(int i =0 ;i < nodes.size(); i++){
-        auto it = contributions.find(i);
-        if(it != contributions.end()){
-            contribute(i,y,p);
-        }
-
-    }
+//   for(auto e:contributions){
+//     cout<<e.first<<" "<<e.second<<endl;
+//   }
     flush();
 
     return true;
@@ -147,29 +158,33 @@ double NeuralNetwork::contribute(int nodeId, const double& y, const double& p) {
     double incomingContribution = 0;
     double outgoingContribution = 0;
     NodeInfo* currNode = nodes.at(nodeId);
-
     // find each incoming contribution, and contribute to the nodes outgoing weights
     // If the node is already found, use its precomputed contribution from the contributions map
+
 
     if (adjacencyList.at(nodeId).empty()) {
         // base case, we are at the end
         outgoingContribution = -1 * ((y - p) / (p * (1 - p)));
-    } 
-    auto it = contributions.find(nodeId);
-    for (auto v: adjacencyList[nodeId]){
-        if(it != contributions.end()){
-            incomingContribution = contribute(nodeId,y,p);
+      
+    }else{
+        for (auto v: adjacencyList[nodeId]){
+        auto it = contributions.find(v.second.dest);
+        if(it == contributions.end()){
+            incomingContribution += contribute(v.second.dest,y,p);
         }else{
-            incomingContribution = contributions.at(nodeId);
+            incomingContribution += contributions.at(v.second.dest);
 
         }
         visitContributeNeighbor(v.second,incomingContribution,outgoingContribution);
-}
-        
+}   
     // Now contribute to yourself and prepare the outgoing contribution
+    }
 
     visitContributeNode(nodeId,outgoingContribution);
-    contributions.insert({nodeId,outgoingContribution});
+ contributions[nodeId] = outgoingContribution;
+    
+
+      
     return outgoingContribution;
 }
 // STUDENT TODO: IMPLEMENT
@@ -184,21 +199,23 @@ bool NeuralNetwork::update() {
     // weight update: weight = weight - (learningRate * delta)
     // reset the delta term for each node and connection to zero.
     NodeInfo* it; 
-    double change;
-    double c;
-    for(int i = 0; i< nodes.size(); i++){
-        it = nodes.at(i);
-        change = learningRate*it->delta;
-        it->bias -=change;
-        for(auto e: adjacencyList[i]){
-            c = nodes.at(e.second.dest)->delta;
-            c*= learningRate;
-            e.second.weight -= c;
-            e.second.delta = 0.0;
-        }
+ for(int i = 0; i < nodes.size(); i++){
+    it = nodes.at(i);
+    it->bias -= learningRate * it->delta;
 
-        it -> delta = 0; 
+    for(auto& e : adjacencyList[i]){
+        e.second.weight -= learningRate * e.second.delta;
     }
+    
+}
+
+for(int i = 0; i < nodes.size(); i++){
+    it = nodes.at(i);
+    it->delta = 0;
+    for(auto& e : adjacencyList[i]){
+        e.second.delta = 0.0;
+    }
+}
     flush();
     return true;
     
