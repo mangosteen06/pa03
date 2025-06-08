@@ -95,16 +95,13 @@ void Graph::updateNode(int id, NodeInfo n) {
     if (id>=nodes.size() || id < 0) {
         cout << "Attempting to update node with id: " << id << " but node does not exist" << endl;
         return;
-    }else{
-        NodeInfo* point= new NodeInfo;
-        point->preActivationValue = n.preActivationValue;
-        point->bias = n.bias;
-        point->activationFunction =n.activationFunction;
-        point->activationDerivative = n.activationDerivative;
-        point->activate();
-        point->delta = n.delta;
-       nodes.at(id)= point;
     }
+     if(nodes[id] != nullptr){
+        delete nodes[id];
+    }
+
+    nodes[id] = new NodeInfo(n);
+
 
 
     // cout<< "a";
@@ -146,6 +143,10 @@ void Graph::clear() {
         delete nodes.at(i);
         nodes.at(i)= nullptr;
     }
+
+    nodes.clear();
+    adjacencyList.clear();
+
     // cout<< "it";
 }
 

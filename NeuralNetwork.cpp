@@ -96,7 +96,7 @@ vector<double> NeuralNetwork::predict(DataInstance instance) {
         Queue.pop();
 
     
-        for (auto& e : adjacencyList[it]) {
+        for (auto e : adjacencyList[it]) {
             visitPredictNeighbor(e.second);  
             inOrder[e.second.dest]--;
             if (inOrder[e.second.dest] == 0 && !visited[e.second.dest]) {
