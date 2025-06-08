@@ -86,16 +86,9 @@ vector<double> NeuralNetwork::predict(DataInstance instance) {
             Queue.push(i);
         }
     }
-    for(int i = 0; i< nodes.size(); i++){
-        if(!visited.at(i)){
-            
-        }
-    }
     while (!Queue.empty()) {
         int it = Queue.front();
         Queue.pop();
-
-    
         for (auto e : adjacencyList[it]) {
             visitPredictNeighbor(e.second);  
             inOrder[e.second.dest]--;

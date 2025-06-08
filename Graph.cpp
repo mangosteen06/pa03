@@ -144,9 +144,6 @@ void Graph::clear() {
         nodes.at(i)= nullptr;
     }
 
-    nodes.clear();
-    adjacencyList.clear();
-
     // cout<< "it";
 }
 
